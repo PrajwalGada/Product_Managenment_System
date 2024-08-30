@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.example.demo.model.Product;
 import com.example.demo.model.Users;
@@ -24,7 +26,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.xml.ws.Response;
 
-@RestController
+@Controller
 @RequestMapping("/rest")
 public class ProductController {
 
@@ -34,10 +36,10 @@ public class ProductController {
 	@Autowired
 	UsersService usersService;
 	
-	@GetMapping("/home")
-	public String home(HttpSession session, HttpServletRequest httpServletRequest) {
-	    return "login"; // This will map to login.html in the templates directory
-	}
+	 @GetMapping("/home")
+	    public ModelAndView home(HttpSession session, HttpServletRequest httpServletRequest) {
+	        return new ModelAndView("register"); 
+	    }
 
 	@PostMapping("/registerUser")
 	public ResponseEntity<Map<String, String>> registerUser(@RequestBody Users users,
