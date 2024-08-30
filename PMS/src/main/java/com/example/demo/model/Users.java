@@ -20,39 +20,36 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Users {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
-	
-	private boolean admin=false;
-	
+
+	private boolean admin = false;
+
 	private String firstName;
-	
+
 	private String lastName;
-	
+
 	private String mobileNo;
-	
+
 	private String email;
-	
+
 	private String City;
-	
+
 	private String State;
-	
+
 	private String password;
-	
+
 	private String registrationDate;
-	
+
 	private String updatedDate;
-	
+
 	private Date dob;
-	
+
 	@Lob
-    @Column(columnDefinition = "MEDIUMBLOB", name = "photo")
-    @JsonIgnore
-    private Blob photo;
-	
-	
-	
+	@Column(columnDefinition = "MEDIUMBLOB", name = "photo")
+	@JsonIgnore
+	private Blob photo;
 
 }

@@ -68,6 +68,7 @@ public class ProductController {
             response.put("message", "Product saved successfully");
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
+        	
             e.printStackTrace();
             response.put("message", "Failed to save product");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
