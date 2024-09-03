@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="ISO-8859-1">
+    <title>User Table</title>
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .table {
+            margin: 20px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+        .table th, .table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        .table th {
+            background-color: #f4f4f4;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="table" id="usersTable">
+        <!-- Table will be dynamically populated here -->
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            getUsersTable();
+        });
+
+        function getUsersTable() {
+            $.ajax({
+                url: contextPath + 'getList', 
+                method: 'GET',
+                success: function(response) {
+                    var tableHtml = '<table class="table">';
+                    tableHtml += '<thead><tr><th>ID</th><th>First Name</th><th>Last Name</th><th>Email</th></tr></thead><tbody>';
+
+                    $.each(response, function(index, user) {
+                        tableHtml += '<tr>';
+                        tableHtml += '<td>' + user.id + '</td>';
+                        tableHtml += '<td>' + user.firstName + '</td>';
+                        tableHtml += '<td>' + user.lastName + '</td>';
+                        tableHtml += '<td>' + user.email + '</td>';
+                        tableHtml += '</tr>';
+                    });
+
+                    tableHtml += '</tbody></table>';
+                    $('#usersTable').html(tableHtml);
+                },
+                error: function(xhr, status, error) {
+                    alert('An error occurred: ' + error);
+                }
+            });
+        }
+
+        // Function to handle link click
+        function clickOnLink(element) {
+            window.open(element.href, '_self');
+        }
+    </script>
+
+    <script th:inline="javascript">
+        var contextPath = /*[[ @{/} ]]*/ '/';
+    </script>
+</body>
+</html>

@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/vendors/mdi/css/materialdesignicons.min.css">
     <link rel="stylesheet" href="/vendors/flag-icon-css/css/flag-icon.min.css">
     <link rel="stylesheet" href="/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <!-- endinject -->
     <!-- Plugin css for this page -->
     <!-- End plugin css for this page -->
@@ -52,6 +53,9 @@
                     <button type="button" class="btn btn-block btn-facebook auth-form-btn">
                       <i class="mdi mdi-facebook mr-2"></i>Connect using facebook </button>
                   </div> -->
+                  <a class="btn btn-outline-primary btn-sm"
+									th:href="@{/login/google}" role="button"><i
+									class="fa fa-google"></i> Login With Google</a>
                   <div class="text-center mt-4 font-weight-light"> Don't have an account? <a th:href="@{registrationts}" class="text-primary">Create</a>
                   </div> 
                 </form>

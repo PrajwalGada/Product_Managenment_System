@@ -18,9 +18,9 @@ public class UsersService {
 	
 
 	public Boolean svaeUsers(Users users) {
-		 List<Users> existingUsers = userRepositary.findByEmail(users.getEmail());
+		 Users existingUsers = userRepositary.findByEmail(users.getEmail());
 	        MessageDigest md = null;
-	        if (!existingUsers.isEmpty()) {
+	        if (existingUsers!=null) {
 
 	            return false;
 	        }
@@ -43,6 +43,18 @@ public class UsersService {
 	        return true;
 		
 		
+	}
+
+
+	public Users findByEmail(String email) {
+		Users existingEmployee = userRepositary.findByEmail(email);
+		return existingEmployee;
+	}
+
+
+	public List<Users> getAll() {
+		// TODO Auto-generated method stub
+		return userRepositary.findAll();
 	}
 
 }

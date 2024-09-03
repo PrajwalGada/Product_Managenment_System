@@ -10,6 +10,6 @@ import com.example.demo.model.Users;
 @Repository
 public interface UserRepositary extends JpaRepository<Users, Long> {
 
-	List<Users> findByEmail(String email);
+	Users findByEmail(String email);
 
 }
