@@ -1,13 +1,18 @@
 package com.example.demo.Controller;
 
+import java.io.IOException;
 import java.net.http.HttpHeaders;
 import java.sql.Blob;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import javax.sql.rowset.serial.SerialException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +27,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -172,6 +178,7 @@ public class ProductController {
 			Users existingEmployee = usersService.findByEmail(email);
 			if (existingEmployee != null) {
 				System.out.println("hi");
+				return "redirect:/list";
 			} else {
 				Users user = new Users();
 				user.setFirstName(name);
@@ -201,4 +208,113 @@ public class ProductController {
 		}
 	}
 
+	@PostMapping("/login")
+	public String login(@RequestParam("email") String email, @RequestParam("password") String password,
+			HttpSession session) {
+
+		Users user = usersService.findByEmail(email);
+		if (user != null && usersService.verifyPassword(password, user.getPassword())) {
+			session.setAttribute("loggedInUser", user);
+			return "redirect:/list";
+
+		} else {
+
+			return "redirect:/home";
+		}
+	}
+
+	@GetMapping("/deleteUser/{id}")
+	public ResponseEntity<Boolean> deleteUser(@PathVariable("id") long id) {
+		boolean status = usersService.deleteById(id);
+
+		if (status) {
+			return new ResponseEntity<>(true, HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(false, HttpStatus.NOT_FOUND);
+		}
+	}
+
+	@GetMapping("/editUser/{id}")
+	public ModelAndView editUser(HttpSession session, @PathVariable("id") long id,
+			HttpServletRequest httpServletRequest) {
+		ModelAndView modelAndView = new ModelAndView("editUser");
+		Optional<Users> userOptional = usersService.findByid(id);
+		if (userOptional.isPresent()) {
+			Users user = userOptional.get();
+			modelAndView.addObject("user", user);
+		} else {
+
+			modelAndView.addObject("errorMessage", "User not found.");
+		}
+
+		return modelAndView;
+	}
+
+	@PostMapping("/updateUser")
+	public ResponseEntity<Map<String, String>> updateUser(@RequestParam("firstName") String firstName,
+			@RequestParam("id") long id, @RequestParam("lastName") String lastName,
+			@RequestParam("mobileNo") String mobile,
+			@RequestParam("dob") @DateTimeFormat(pattern = "yyyy-MM-dd") Date dob, @RequestParam("email") String email,
+			@RequestParam("password") String password, @RequestParam("image") MultipartFile file,
+			@RequestParam(name = "adminid", required = false) Integer adminId, HttpSession session)
+			throws SerialException, SQLException {
+
+		Map<String, String> response = new HashMap<>();
+		Optional<Users> userOptional = usersService.findByid(id);
+		if (!userOptional.isPresent()) {
+			response.put("status", "error");
+			response.put("message", "User not found.");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+		}
+		Users user = userOptional.get();
+		user.setFirstName(firstName);
+		user.setLastName(lastName);
+		user.setEmail(email);
+		user.setMobileNo(mobile);
+		user.setPassword(password);
+		user.setDob(dob);
+		user.setUpdatedDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+		if (file != null && !file.isEmpty()) {
+			try {
+				byte[] bytes = file.getBytes();
+				Blob blob = new javax.sql.rowset.serial.SerialBlob(bytes);
+				user.setPhoto(blob);
+			} catch (IOException e) {
+				response.put("status", "error");
+				response.put("message", "Failed to upload image.");
+				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+			}
+		}
+		boolean status = usersService.svaeUsers(user);
+		if (status) {
+			response.put("status", "success");
+			response.put("message", "User updated successfully.");
+			return ResponseEntity.ok(response);
+		} else {
+			response.put("status", "error");
+			response.put("message", "Failed to update user.");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+		}
+	}
+
+	@GetMapping("/display")
+	public ResponseEntity<byte[]> displayImage(@RequestParam("id") long id) throws IOException, SQLException {
+
+		Optional<Users> image = usersService.findByid(id);
+		if (image != null && image.get().getPhoto() != null) {
+			byte[] imageBytes = image.get().getPhoto().getBytes(1, (int) image.get().getPhoto().length());
+			if (imageBytes != null) {
+				return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageBytes);
+			}
+		}
+
+		return ResponseEntity.notFound().build();
+	}
+
+	@GetMapping("/logout")
+	public String logout(HttpSession session) {
+
+		session.removeAttribute("loggedInUser");
+		return "redirect:/home";
+	}
 }

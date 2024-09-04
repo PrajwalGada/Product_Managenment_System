@@ -87,10 +87,7 @@
 															</style>
 															<div class="">
 																 <a th:href="@{/home}" style="font-size: -webkit-xxx-large;">LMS</a>
-																		
-																		
-																		
-																</a>
+																
 															</div>
 														</div>
 													</div>
@@ -117,7 +114,7 @@
 																			class="fas fa-align-justify"></i>
 																	</div>
 																</div>
-																<nav th:if="${session.loggedInUser!=null} and ${session.loggedInUser.adminid!=0 }"
+																<nav th:if="${session.loggedInUser!=null}"
 																	class="uael-nav-menu__layout-horizontal uael-nav-menu__submenu-arrow"
 																	data-toggle-icon="<i aria-hidden=&quot;true&quot; tabindex=&quot;0&quot; class=&quot;fas fa-align-justify&quot;></i>"
 																	data-close-icon="<i aria-hidden=&quot;true&quot; tabindex=&quot;0&quot; class=&quot;far fa-window-close&quot;></i>"
@@ -128,7 +125,7 @@
 																			data-dropdown-width="default"
 																			data-dropdown-pos="left"><a
 																				th:href="@{/sites}"
-																				class="uael-menu-item text-dark">Applications<span
+																				class="uael-menu-item text-dark">Register Product<span
 																					class="uael-menu-toggle sub-arrow parent-item text-success"><i
 																						class="fa"></i></span></a></li>
 

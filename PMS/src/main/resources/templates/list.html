@@ -1,70 +1,93 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="ISO-8859-1">
-    <title>User Table</title>
-    <!-- jQuery CDN -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <style>
-        .table {
-            margin: 20px;
-            border-collapse: collapse;
-            width: 100%;
-        }
-        .table th, .table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-        }
-        .table th {
-            background-color: #f4f4f4;
-            text-align: left;
-        }
-    </style>
+<meta charset="ISO-8859-1">
+<title>User Table</title>
+<!-- jQuery CDN -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Toastr.js CDN -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.1/css/toastr.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.1/js/toastr.min.js"></script>
+
+<style>
+.table {
+	margin: 20px;
+	border-collapse: collapse;
+	width: 100%;
+}
+
+.table th, .table td {
+	border: 1px solid #ddd;
+	padding: 8px;
+}
+
+.table th {
+	background-color: #f4f4f4;
+	text-align: left;
+}
+</style>
 </head>
 <body>
-    <div class="table" id="usersTable">
-        <!-- Table will be dynamically populated here -->
-    </div>
+	<div th:insert="header"></div>
+	<div class="table" id="usersTable">
+		<!-- Table will be dynamically populated here -->
+	</div>
 
-    <script>
-        $(document).ready(function() {
-            getUsersTable();
-        });
+	<script>
+		$(document).ready(function() {
+			getUsersTable();
+		});
 
-        function getUsersTable() {
-            $.ajax({
-                url: contextPath + 'getList', 
-                method: 'GET',
-                success: function(response) {
-                    var tableHtml = '<table class="table">';
-                    tableHtml += '<thead><tr><th>ID</th><th>First Name</th><th>Last Name</th><th>Email</th></tr></thead><tbody>';
+		function getUsersTable() {
+			$.ajax({
+				url : contextPath + 'getList',
+				method : 'GET',
+				success : function(response) {
+					var tableHtml = '<table class="table">';
+					tableHtml += '<thead><tr><th>ID</th><th>First Name</th><th>Last Name</th><th>Email</th><th>Edit</th><th>Delete</th></tr></thead><tbody>';
 
-                    $.each(response, function(index, user) {
-                        tableHtml += '<tr>';
-                        tableHtml += '<td>' + user.id + '</td>';
-                        tableHtml += '<td>' + user.firstName + '</td>';
-                        tableHtml += '<td>' + user.lastName + '</td>';
-                        tableHtml += '<td>' + user.email + '</td>';
-                        tableHtml += '</tr>';
-                    });
+					$.each(response, function(index, user) {
+						tableHtml += '<tr>';
+						tableHtml += '<td>' + user.id + '</td>';
+						tableHtml += '<td>' + user.firstName + '</td>';
+						tableHtml += '<td>' + user.lastName + '</td>';
+						tableHtml += '<td>' + user.email + '</td>';
+						tableHtml += '<td><button class="btn btn-sm btn-warning" onclick="editUser(' + user.id + ')">Edit</button></td>';
+						tableHtml += '<td><button class="btn btn-sm btn-danger" onclick="deleteUser(' + user.id + ')">Delete</button></td>';
+						tableHtml += '</tr>';
+					});
 
-                    tableHtml += '</tbody></table>';
-                    $('#usersTable').html(tableHtml);
-                },
-                error: function(xhr, status, error) {
-                    alert('An error occurred: ' + error);
-                }
-            });
-        }
+					tableHtml += '</tbody></table>';
+					$('#usersTable').html(tableHtml);
+				},
+				error : function(xhr, status, error) {
+					toastr.error('An error occurred: ' + error, 'Error');
+				}
+			});
+		}
 
-       
-        function clickOnLink(element) {
-            window.open(element.href, '_self');
-        }
-    </script>
+		function editUser(id) {
+		    window.location.href = contextPath + 'editUser/' + id;
+		}
 
-    <script th:inline="javascript">
-        var contextPath = /*[[ @{/} ]]*/ '/';
-    </script>
+		function deleteUser(id) {
+		    $.ajax({
+		            url: contextPath + 'deleteUser/' + id,
+		            method: 'GET',
+		            success: function(response) {
+		                toastr.success('User deleted successfully!', 'Success');
+		                getUsersTable(); 
+		            },
+		            error: function(xhr, status, error) {
+		                toastr.error('An error occurred: ' + error, 'Error');
+		            }
+		        });
+		    
+		}
+
+		
+	</script>
+
+	
 </body>
 </html>
