@@ -295,7 +295,7 @@ public class ProductController {
 			response.put("message", "Failed to update user.");
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
 		}
-	}
+	} 
 
 	@GetMapping("/display")
 	public ResponseEntity<byte[]> displayImage(@RequestParam("id") long id) throws IOException, SQLException {
