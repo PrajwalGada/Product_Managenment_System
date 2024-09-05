@@ -1,7 +1,6 @@
 package com.example.demo.Controller;
 
 import java.io.IOException;
-import java.net.http.HttpHeaders;
 import java.sql.Blob;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -23,16 +22,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
@@ -74,13 +67,15 @@ public class ProductController {
 		return new ModelAndView("register");
 	}
 
-	@PostMapping("/add")
-	public ResponseEntity<Map<String, String>> addEmployee(@RequestParam("firstName") String firstName,
-			@RequestParam("lastName") String lastName, @RequestParam("mobile") String mobile,
-			@RequestParam("address") String address,
-			@RequestParam("dob") @DateTimeFormat(pattern = "yyyy-MM-dd") Date dob, @RequestParam("email") String email,
-			@RequestParam("password") String password, @RequestParam("image") MultipartFile file,
-			@RequestParam(name = "adminid", required = false) Integer adminId, HttpSession session) {
+
+	@PostMapping("/addUser")
+	public String addEmployee(@RequestParam("firstName") String firstName,
+							  @RequestParam("lastName") String lastName, @RequestParam("mobile") String mobile,
+							  @RequestParam("address") String address,
+							  @RequestParam("dob") @DateTimeFormat(pattern = "yyyy-MM-dd") Date dob, @RequestParam("email") String email,
+							  @RequestParam("password") String password, @RequestParam("image") MultipartFile file,
+							  @RequestParam(name = "adminid", required = false) Integer adminId, HttpSession session) {
+
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String formattedDate = dateFormat.format(new Date());
 
@@ -98,23 +93,54 @@ public class ProductController {
 			users.setPassword(password);
 			if (file != null && !file.isEmpty()) {
 				byte[] bytes = file.getBytes();
-				Blob blob = new javax.sql.rowset.serial.SerialBlob(bytes);
-				users.setPhoto(blob);
+				users.setPhoto(bytes);
 			}
 
-			boolean message = usersService.svaeUsers(users);
-			if (message) {
-				response.put("message", "User saved successfully");
-				return ResponseEntity.status(HttpStatus.CREATED).body(response);
+			boolean savedUser = usersService.svaeUsers(users);
+			if (savedUser) {
+
+				return "redirect:/home";
 			} else {
 				response.put("message", "User already exists or could not be saved");
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+				session.setAttribute("response",ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response));
+				return "redirect:/notFoundError";
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			response.put("message", "An error occurred while saving the user");
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+			session.setAttribute("response",ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response));
+			return "redirect:/internalServerErr";
 		}
+	}
+
+	@GetMapping("/dashboard")
+	public ModelAndView dashboard(@RequestParam("userId") Long userId, Model model, HttpSession session, HttpServletRequest httpServletRequest) {
+
+		Users user = (Users) session.getAttribute("loggedInUser");
+		String profilePictureUrl = "/user/" + userId + "/profile-picture";
+		model.addAttribute("profilePictureUrl", profilePictureUrl);
+		model.addAttribute("userId", userId);
+		model.addAttribute("userName", user.getFirstName()+" "+user.getLastName());
+
+
+
+
+		return new ModelAndView("dashboard");
+	}
+
+	@GetMapping("/user/{id}/profile-picture")
+	@ResponseBody
+	public ResponseEntity<byte[]> getProfilePicture(@PathVariable Long id,HttpSession session) {
+		if(session.getAttribute("loggedInUser")!=null) {
+			Users user = (Users) session.getAttribute("loggedInUser");
+			byte[] image = user.getPhoto();
+
+			// Return the image with the correct content type
+			return ResponseEntity.ok()
+					.contentType(MediaType.IMAGE_JPEG)  // or MediaType.IMAGE_PNG if it's PNG
+					.body(image);
+		}
+		return null;
 	}
 
 	@PostMapping("/registerProduct")
@@ -215,7 +241,7 @@ public class ProductController {
 		Users user = usersService.findByEmail(email);
 		if (user != null && usersService.verifyPassword(password, user.getPassword())) {
 			session.setAttribute("loggedInUser", user);
-			return "redirect:/list";
+			return "redirect:/dashboard?userId=" + user.getId();
 
 		} else {
 
@@ -277,8 +303,7 @@ public class ProductController {
 		if (file != null && !file.isEmpty()) {
 			try {
 				byte[] bytes = file.getBytes();
-				Blob blob = new javax.sql.rowset.serial.SerialBlob(bytes);
-				user.setPhoto(blob);
+				user.setPhoto(bytes);
 			} catch (IOException e) {
 				response.put("status", "error");
 				response.put("message", "Failed to upload image.");
@@ -286,7 +311,7 @@ public class ProductController {
 			}
 		}
 		boolean status = usersService.svaeUsers(user);
-		if (status) {
+		if (status ) {
 			response.put("status", "success");
 			response.put("message", "User updated successfully.");
 			return ResponseEntity.ok(response);
@@ -297,24 +322,38 @@ public class ProductController {
 		}
 	} 
 
-	@GetMapping("/display")
-	public ResponseEntity<byte[]> displayImage(@RequestParam("id") long id) throws IOException, SQLException {
-
-		Optional<Users> image = usersService.findByid(id);
-		if (image != null && image.get().getPhoto() != null) {
-			byte[] imageBytes = image.get().getPhoto().getBytes(1, (int) image.get().getPhoto().length());
-			if (imageBytes != null) {
-				return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageBytes);
-			}
-		}
-
-		return ResponseEntity.notFound().build();
-	}
+//	@GetMapping("/display")
+//	public ResponseEntity<byte[]> displayImage(@RequestParam("id") long id) throws IOException, SQLException {
+//
+//		Optional<Users> image = usersService.findByid(id);
+//		if (image != null && image.get().getPhoto() != null) {
+//			byte[] imageBytes = image.get().getPhoto().getBytes(1, (int) image.get().getPhoto().length());
+//			if (imageBytes != null) {
+//				return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageBytes);
+//			}
+//		}
+//
+//		return ResponseEntity.notFound().build();
+//	}
 
 	@GetMapping("/logout")
 	public String logout(HttpSession session) {
 
 		session.removeAttribute("loggedInUser");
 		return "redirect:/home";
+	}
+	@GetMapping("/internalServerError")
+	public ModelAndView internalServerErr( Model model, HttpSession session) {
+		ResponseEntity<String> responseEntity = (ResponseEntity<String>) session.getAttribute("response");
+		String responseBody = responseEntity.getBody();
+		model.addAttribute("response", responseBody);
+		return new ModelAndView("error-500");
+	}
+	@GetMapping("/notFoundError")
+	public ModelAndView notFoundError( Model model, HttpSession session) {
+		ResponseEntity<String> responseEntity = (ResponseEntity<String>) session.getAttribute("response");
+		String responseBody = responseEntity.getBody();
+		model.addAttribute("response", responseBody);
+		return new ModelAndView("error-404");
 	}
 }

@@ -50,6 +50,6 @@ public class Users {
 	@Lob
 	@Column(columnDefinition = "MEDIUMBLOB", name = "photo")
 	@JsonIgnore
-	private Blob photo;
+	private byte[] photo;
 
 }

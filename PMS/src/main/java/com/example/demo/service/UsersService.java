@@ -47,6 +47,10 @@ public class UsersService {
 		Users existingEmployee = userRepositary.findByEmail(email);
 		return existingEmployee;
 	}
+	public Users findById(long id) {
+		Users existingEmployee = userRepositary.findById(id).orElseThrow(() -> new RuntimeException("User not found"));;
+		return existingEmployee;
+	}
 
 	public List<Users> getAll() {
 		// TODO Auto-generated method stub
