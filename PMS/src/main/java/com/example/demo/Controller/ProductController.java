@@ -66,6 +66,11 @@ public class ProductController {
 	public ModelAndView registrationts(HttpSession session, HttpServletRequest httpServletRequest) {
 		return new ModelAndView("register");
 	}
+	@GetMapping("/productRegistration")
+	public ModelAndView getMethodName(HttpSession session, HttpServletRequest httpServletRequest) {
+		return new ModelAndView("productRegister");
+	}
+	
 
 
 	@PostMapping("/addUser")
@@ -144,9 +149,15 @@ public class ProductController {
 	}
 
 	@PostMapping("/registerProduct")
-	public ResponseEntity<Map<String, String>> registerProduct(@RequestBody Product product,
+	public ResponseEntity<Map<String, String>> registerProduct(@RequestParam("productName")String productName,@RequestParam("product_qty")String product_qty,@RequestParam("Product_price")String product_price,
+			@RequestParam("description") String desc,
 			@RequestParam("image") MultipartFile file) {
 		Map<String, String> response = new HashMap<>();
+		Product product=new Product();
+		product.setDescription(desc);
+		product.setProductName(productName);
+		product.setQty(Long.parseLong(product_qty));
+		product.setPrice(product_price);
 		try {
 			if (file != null) {
 				byte[] bytes = file.getBytes();

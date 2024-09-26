@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connect Plus</title>
+<link rel="stylesheet"
+	href="/vendors/mdi/css/materialdesignicons.min.css">
+<link rel="stylesheet"
+	href="/vendors/flag-icon-css/css/flag-icon.min.css">
+<link rel="stylesheet" href="/vendors/css/vendor.bundle.base.css">
+<link rel="stylesheet" href="/css/style.css">
+<link rel="shortcut icon" href="images/favicon.png" />
+</head>
+<body>
+	<div th:insert="header"></div>
+	<div class="container-scroller">
+		<div class="container-fluid page-body-wrapper full-page-wrapper">
+			<div class="content-wrapper d-flex align-items-center auth">
+				<div class="row flex-grow">
+					<div class="col-lg-4 mx-auto">
+						<div class="auth-form-light text-left p-5">
+							<div class="brand-logo">
+								<img src="/images/logo-dark.svg" alt="Logo">
+							</div>
+							<h4>Register product?...</h4>
+							<h6 class="font-weight-light">Register Product</h6>
+							<form th:action="@{/registerProduct}" method="post"
+								enctype="multipart/form-data">
+								<!-- Fields for user information -->
+								<div class="form-group">
+									<input type="text" class="form-control form-control-lg"
+										name="productName" placeholder="Product Name">
+								</div>
+
+								<div class="form-group">
+									<input type="text" class="form-control form-control-lg"
+										name="product_qty" placeholder="Producty Qty">
+								</div>
+								<div class="form-group">
+									<input type="text" class="form-control form-control-lg"
+										name="Product_price" placeholder="Product price">
+								</div>
+								<div class="form-group">
+									<input type="text" class="form-control form-control-lg"
+										name="description" placeholder="description">
+								</div>
+								<div class="form-group">
+									Upload Profile Picture: <input type="file"
+										class="form-control form-control-lg" name="image">
+								</div>
+						</div>
+						<div class="mt-3">
+							<button type="submit"
+								class="btn btn-block btn-primary btn-lg font-weight-medium auth-form-btn">SIGN
+								UP</button>
+						</div>
+						<div class="mt-3">
+							<!-- Back Button -->
+							<button type="button"
+								class="btn btn-block btn-secondary btn-lg font-weight-medium auth-form-btn"
+								onclick="window.history.back();">BACK</button>
+						</div>
+
+						</form>
+
+
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+	</div>
+
+
+	<script src="/vendors/js/vendor.bundle.base.js"></script>
+
+	<script src="/js/off-canvas.js"></script>
+	<script src="/js/hoverable-collapse.js"></script>
+	<script src="/js/misc.js"></script>
+
+
+	<script type="text/javascript">
+		function clickOnLink(element) {
+			window.open(element.href, '_self');
+		}
+	</script>
+	<script th:inline="javascript">
+		var contextPath = /*[[ @{/} ]]*/'/';
+	</script>
+</body>
+</html>

@@ -31,6 +31,8 @@ public class Product {
 	
 	private Date registrationDate;
 	
+	private String price;
+	
 	private  String description;
 	@Lob
     @Column(columnDefinition = "MEDIUMBLOB", name = "photo")
